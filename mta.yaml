@@ -1,0 +1,56 @@
+ID: Z1_CF_Application
+_schema-version: '2.1'
+description: Cloud Foundry application
+parameters:
+  deploy_mode: html5-repo
+version: 0.0.1
+modules:
+  - name: Z1_CF_Application_appRouter
+    type: approuter.nodejs
+    path: Z1_CF_Application_appRouter
+    parameters:
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: Z1_CF_Application_html5_repo_runtime
+      - name: uaa_Z1_CF_Application
+  - name: Z1_CF_Application_ui_deployer
+    type: com.sap.html5.application-content
+    path: Z1_CF_Application_ui_deployer
+    requires:
+      - name: Z1_CF_Application_html5_repo_host
+    build-parameters:
+      requires:
+        - name: UI
+          artifacts:
+            - './*'
+          target-path: resources/UI
+  - name: UI
+    type: html5
+    path: UI
+    build-parameters:
+      builder: grunt
+      supported-platforms: []
+      build-result: dist
+resources:
+  - name: Z1_CF_Application_html5_repo_runtime
+    parameters:
+      service-plan: app-runtime
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+  - name: Z1_CF_Application_html5_repo_host
+    parameters:
+      service-plan: app-host
+      service: html5-apps-repo
+    type: org.cloudfoundry.managed-service
+  - name: uaa_Z1_CF_Application
+    parameters:
+      path: ./xs-security.json
+      service-plan: application
+      service: xsuaa
+    type: org.cloudfoundry.managed-service
+  - name: dest_Z1_CF_Application
+    parameters:
+      service-plan: lite
+      service: destination
+    type: org.cloudfoundry.managed-service
